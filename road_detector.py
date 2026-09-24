@@ -1,14 +1,16 @@
+import datetime
 from ultralytics import YOLO
 
 class RoadSenseDetector:
-    def __init__(self, model_path="best.pt", conf_thresh=0.60):
+    def __init__(self, model_path="best.pt", conf_thresh=0.50):
         self.model = YOLO(model_path)
         self.conf_thresh = conf_thresh
         self.class_names = {0: "pothole", 1: "missing_zebra"}
 
-    def predict(self, frame):
+    def predict(self, frame, current_lat=28.6142, current_lon=77.2110):
         results = self.model(frame, conf=self.conf_thresh, verbose=False)
         detections = []
+        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
         for r in results:
             for box in r.boxes:
@@ -17,9 +19,16 @@ class RoadSenseDetector:
                 event_name = self.class_names.get(cls_id)
                 if not event_name: continue
 
+                # EXACT MATCH FOR ASHUTOSH'S WHATSAPP JSON
                 detection_dict = {
                     "eventType": event_name,
                     "confidence": round(conf, 2),
+                    "timestamp": timestamp,
+                    "vehicleId": "BUS_DEMO_01",
+                    "location": {
+                        "latitude": current_lat,
+                        "longitude": current_lon
+                    },
                     "metadata": {}
                 }
 
