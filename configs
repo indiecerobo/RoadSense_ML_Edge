@@ -1,0 +1,5 @@
+train: ../Master_Dataset/images/train
+val: ../Master_Dataset/images/valid
+
+nc: 2
+names: ['pothole', 'missing_zebra']
